@@ -589,20 +589,6 @@ define(function(require) {
 			return result;
 		},
 
-		formatMacAddress: function(pMacAddress) {
-			var regex = /[^0-9a-fA-F]/g,
-				macAddress = pMacAddress.replace(regex, ''),
-				formattedMac = '';
-
-			if (macAddress.length === 12) {
-				_.each(macAddress.split(''), function(char, idx) {
-					formattedMac += (idx % 2 === 0 && idx !== 0 ? ':' : '') + macAddress[idx];
-				});
-			}
-
-			return formattedMac;
-		},
-
 		getDefaultRangeDates: function(pRange) {
 			var self = this,
 				range = pRange || 7,
@@ -1065,6 +1051,33 @@ define(function(require) {
 			printLogs();
 		}
 	};
+
+	/**
+	 * Returns a formatted MAC address (with colon) or an empty string
+	 * @param  {String} mac String to format
+	 * @return {String}     Formatted string
+	 *
+	 * The case of an empty "mac" is not handle for legacy purposes.
+	 */
+	function formatMacAddress(mac) {
+		if (!_.isString(mac)) {
+			throw new TypeError('"mac" is not a string');
+		}
+		var trimmed = mac.replace(/[^0-9a-f]/gi, '');
+		return trimmed.length !== 12
+			? ''
+			: _.chain(trimmed)
+				.toArray()
+				.map(function(char, idx) {
+					return (idx % 2 === 0 && idx !== 0
+						? ':'
+						: ''
+					) + char;
+				})
+				.join('')
+				.toUpper()
+				.value();
+	}
 
 	/**
 	 * Decimal and currency formatting for prices
